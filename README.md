@@ -7,7 +7,7 @@
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000205; color: white; font-family: 'Pretendard', sans-serif; }
         canvas { display: block; }
         
-        /* 상단 NEIS API 설정 패널 */
+        const HARDCODED_API_KEY = "7fa09fa2743e4c78844dfc42faef8a41";
         #api-panel {
             position: absolute; top: 15px; right: 20px; z-index: 10;
             background: rgba(0, 0, 0, 0.75); padding: 12px 16px; border-radius: 16px;
