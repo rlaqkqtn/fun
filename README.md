@@ -7,49 +7,52 @@
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000205; color: white; font-family: 'Pretendard', sans-serif; }
         canvas { display: block; }
 
-        /* [수정 3] 오른쪽 상단 급식표 UI */
+        /* UI 슬림화: 오른쪽 상단 급식표 */
         #meal-board {
-            position: absolute; top: 20px; right: 20px;
-            background: rgba(0, 0, 0, 0.75); padding: 15px; border-radius: 15px;
+            position: absolute; top: 15px; right: 15px;
+            background: rgba(0, 0, 0, 0.75); padding: 10px 12px; border-radius: 12px;
             border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px);
-            width: 220px; z-index: 10; font-size: 13px;
+            width: 170px; z-index: 10; font-size: 11px;
         }
-        #meal-board h3 { margin: 0 0 10px 0; font-size: 14px; color: #00f2fe; text-align: center; }
-        #meal-list { list-style: none; padding: 0; margin: 0; max-height: 250px; overflow-y: auto; }
-        #meal-list li { padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); color: #ddd; font-size: 12px; }
+        #meal-board h3 { margin: 0 0 6px 0; font-size: 12px; color: #00f2fe; text-align: center; }
+        #meal-list { list-style: none; padding: 0; margin: 0; max-height: 180px; overflow-y: auto; }
+        #meal-list li { padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.05); color: #ddd; font-size: 11px; }
 
-        /* 좌측 상단 리더보드 (기존 유지) */
-        #leaderboard { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.7); padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.08); width: 220px; z-index: 5; pointer-events: none; }
+        /* UI 슬림화: 좌측 상단 리더보드 */
+        #leaderboard { 
+            position: absolute; top: 15px; left: 15px; 
+            background: rgba(0,0,0,0.7); padding: 10px 12px; border-radius: 12px; 
+            border: 1px solid rgba(255,255,255,0.08); width: 160px; z-index: 5; pointer-events: none; 
+        }
 
-        /* 하단 투하 UI (기존 유지) */
-        #ui { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 10; width: 100%; max-width: 450px; }
-        #input-box { display: flex; gap: 10px; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 20px; backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        input { flex: 1; background: transparent; border: none; color: white; outline: none; font-size: 16px; padding-left: 10px; }
+        /* UI 슬림화: 하단 투하 UI */
+        #ui { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10; width: 100%; max-width: 360px; }
+        #input-box { display: flex; gap: 8px; background: rgba(255,255,255,0.03); padding: 8px 10px; border-radius: 15px; backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
+        input { flex: 1; background: transparent; border: none; color: white; outline: none; font-size: 13px; padding-left: 6px; }
         input::placeholder { color: rgba(255,255,255,0.3); }
-        button { background: linear-gradient(45deg, #00f2fe, #4facfe); border: none; padding: 10px 20px; border-radius: 12px; font-weight: bold; color: white; cursor: pointer; transition: 0.2s; white-space: nowrap; }
-        button:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(0,242,254,0.6); }
+        button { background: linear-gradient(45deg, #00f2fe, #4facfe); border: none; padding: 6px 14px; border-radius: 10px; font-weight: bold; color: white; cursor: pointer; transition: 0.2s; white-space: nowrap; font-size: 12px; }
+        button:hover { transform: scale(1.05); box-shadow: 0 0 10px rgba(0,242,254,0.6); }
     </style>
 </head>
 <body>
 
 <div id="leaderboard">
-    <h3 style="margin:0 0 10px 0; font-size:14px; color:#aaa; text-align:center; text-transform:uppercase; letter-spacing:1px;">👑 생태계 순위</h3>
+    <h3 style="margin:0 0 6px 0; font-size:12px; color:#aaa; text-align:center; text-transform:uppercase; letter-spacing:1px;">👑 생태계 순위</h3>
     <div id="list"></div>
 </div>
 
-<!-- 오른쪽 상단 급식표 -->
 <div id="meal-board">
-    <h3>🍱오늘의 급식표</h3>
+    <h3>🍱 오늘의 급식표</h3>
     <ul id="meal-list">
-        <li style="color:#888; text-align:center;">급식 불러오는 중...</li>
+        <li style="color:#888; text-align:center;">불러오는 중...</li>
     </ul>
-    <button id="retry-btn" style="width:100%; margin-top:10px; font-size:11px; padding:6px;">급식 다시 투하</button>
+    <button id="retry-btn" style="width:100%; margin-top:6px; font-size:10px; padding:4px;">급식 다시 투하</button>
 </div>
 
 <div id="ui">
     <form id="spawn-form">
         <div id="input-box">
-            <input type="text" id="target-text" placeholder="단어를 입력해 생명체 투하..." required maxlength="15" autocomplete="off">
+            <input type="text" id="target-text" placeholder="단어 입력..." required maxlength="15" autocomplete="off">
             <button type="submit">투하</button>
         </div>
     </form>
@@ -62,7 +65,6 @@
     const { Engine, Runner, Bodies, Composite, Events, Body, Vector } = Matter;
     const engine = Engine.create({ enableSleeping: false });
     
-    // 급식 밥이천천히 떨어지도록 중력 적용
     engine.world.gravity.y = 0.2;
 
     const canvas = document.getElementById('world');
@@ -70,10 +72,9 @@
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const boundarySize = { width: 800, height: 700 }; 
+    let boundarySize = { width: canvas.width * 0.95, height: canvas.height * 0.9 }; 
     const autoWords = ["새우", "치어", "플랑크톤", "조개", "해파리", "멸치", "해조류", "송사리", "구피","상어","오징어"]; 
 
-    // 물고기 스폰 (기존 크기보다 확대 요청 반영)
     const spawn = (text, x, y, sizeOverride = null) => {
         let isJackpot = sizeOverride ? false : Math.random() < 0.05;
         let baseSize = sizeOverride || (30 + (text.length * 6)); 
@@ -103,13 +104,11 @@
         return fish;
     };
 
-    // [수정 2] 급식 밥 투하 (글씨 적힌 동그라미 밥 형태)
     const dropFood = (menuText) => {
-        // 글씨 길이에 비례해 동그라미 반지름(radius) 결정 (물고기보다 작게)
-        const radius = Math.min(Math.max(menuText.length * 5 + 12, 18), 45);
-        const spawnX = Math.random() * (canvas.width - 300) + 150;
+        const radius = Math.min(Math.max(menuText.length * 5 + 10, 16), 40);
+        const spawnX = Math.random() * (canvas.width * 0.8) + (canvas.width * 0.1);
 
-        const food = Bodies.circle(spawnX, -30, radius, {
+        const food = Bodies.circle(spawnX, -20, radius, {
             frictionAir: 0.05,
             restitution: 0.4,
             label: 'food'
@@ -117,12 +116,11 @@
 
         food.word = menuText;
         food.size = radius;
-        food.color = '#fffb00'; // 급식 밥 네온 노란색
+        food.color = '#fffb00';
 
         Composite.add(engine.world, food);
     };
 
-    // [수정 1] 물고기 생성 속도 낮춤 (기존 1500ms -> 5000ms 로 변경)
     const checkPopulation = () => {
         const bodies = Composite.allBodies(engine.world).filter(b => b.label === 'fish');
         if (bodies.length < 7) {
@@ -138,7 +136,6 @@
         const foods = bodies.filter(b => b.label === 'food');
         const center = { x: canvas.width / 2, y: canvas.height / 2 };
 
-        // 바닥 나간 밥 제거
         foods.forEach(food => {
             if (food.position.y > canvas.height + 50) {
                 Composite.remove(engine.world, food);
@@ -146,7 +143,6 @@
         });
 
         fishes.forEach(me => {
-            // 물고기는 중력에 영향받지 않도록 보정
             Body.setVelocity(me, { x: me.velocity.x, y: me.velocity.y - engine.world.gravity.y * 0.9 });
 
             if (me.size > 350) {
@@ -164,12 +160,11 @@
                 Body.applyForce(me, me.position, Vector.mult(toCenter, 0.007 * me.size));
             }
 
-            // 1. 급식 밥 동그라미를 우선 탐색 및 추적
             let nearestFood = null;
             let minFoodDist = Infinity;
             foods.forEach(food => {
                 const dist = Vector.magnitude(Vector.sub(me.position, food.position));
-                if (dist < 400 && dist < minFoodDist) {
+                if (dist < 500 && dist < minFoodDist) {
                     minFoodDist = dist;
                     nearestFood = food;
                 }
@@ -180,7 +175,6 @@
                 const norm = Vector.normalise(diff);
                 Body.applyForce(me, me.position, Vector.mult(norm, 0.0007 * me.size));
 
-                // 밥 섭취
                 if (minFoodDist < me.size + nearestFood.size) {
                     const oldSize = me.size;
                     me.size += nearestFood.size * 0.4;
@@ -189,7 +183,6 @@
                     Composite.remove(engine.world, nearestFood);
                 }
             } else {
-                // 2. 밥이 없으면 다른 물고기 유영
                 let nearest = null;
                 let minDist = Infinity;
                 const visionRange = me.size * 12; 
@@ -211,7 +204,6 @@
                 }
             }
 
-            // 3. 기존 물고기 상호 포식 유지
             fishes.forEach(other => {
                 if (me === other || other.removed) return;
                 const dist = Vector.magnitude(Vector.sub(me.position, other.position));
@@ -233,7 +225,6 @@
         });
     });
 
-    // 물고기 그리기 (기존 코드 100% 동일)
     function drawFish(ctx, f) {
         const { x, y } = f.position;
         const speed = Vector.magnitude(f.velocity);
@@ -284,7 +275,6 @@
         ctx.restore();
     }
 
-    // 동그라미 밥 그리기
     function drawFood(ctx, food) {
         const { x, y } = food.position;
         ctx.save();
@@ -324,23 +314,23 @@
 
         const sorted = fishes.sort((a,b) => b.size - a.size).slice(0, 5);
         document.getElementById('list').innerHTML = sorted.map((f, i) => `
-            <div style="margin-bottom:8px; font-size:12px; display:flex; justify-content:space-between; align-items:center;">
+            <div style="margin-bottom:4px; font-size:11px; display:flex; justify-content:space-between; align-items:center;">
                 <span style="color:#aaa;">${i+1}.</span>
-                <span style="color:${f.color}; font-weight:bold; flex:1; text-align:left; padding:0 10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                <span style="color:${f.color}; font-weight:bold; flex:1; text-align:left; padding:0 6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
                     ${f.word}
                 </span>
-                <span style="color:#aaa; font-size:11px;">${Math.floor(f.size)}</span>
+                <span style="color:#aaa; font-size:10px;">${Math.floor(f.size)}</span>
             </div>
         `).join('');
         requestAnimationFrame(render);
     })();
 
     // ==========================================
-    // 나이스(NEIS) 급식 API 연동
+    // 나이스(NEIS) 급식 API 연동 파트
     // ==========================================
     const API_KEY = "7fa09fa2743e4c78844dfc42faef8a41";
-    const OFFICE_CODE = "B10";   // 서울특별시교육청 (필요시 변경)
-    const SCHOOL_CODE = "7010537"; // 강동고등학교 예시 (필요시 변경)
+    const OFFICE_CODE = "B10";   
+    const SCHOOL_CODE = "7010117"; // 입력하신 새로운 학교 코드로 적용 완료!
 
     async function loadNeisMeal() {
         const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
@@ -361,28 +351,23 @@
 
                 const menuItems = cleanMenu.split('\n').filter(item => item.trim() !== '');
 
-                // 오른쪽 급식표 UI 업데이트
                 mealListEl.innerHTML = menuItems.map(item => `<li>• ${item}</li>`).join('');
 
-                // 밥 투하 (0.5초 간격)
                 menuItems.forEach((item, idx) => {
                     setTimeout(() => dropFood(item.trim()), idx * 500);
                 });
             } else {
-                // 주말/방학 등 급식 없을 때 샘플 급식으로 자동 전환
-                mealListEl.innerHTML = `<li style="color:#ffb199;">(오늘 급식 없음 - 샘플)</li>`;
-                dropSampleMeal();
+                throw new Error("No data");
             }
         } catch (e) {
-            mealListEl.innerHTML = `<li style="color:#ffb199;">(샘플 급식 투하 중)</li>`;
             dropSampleMeal();
         }
     }
 
     function dropSampleMeal() {
-        const samples = [ " 예시 "];
+        const samples = ["제육볶음", "돈까스", "배추김치", "잔치국수", "초코케이크", "바나나우유"];
         const mealListEl = document.getElementById('meal-list');
-        mealListEl.innerHTML += samples.map(item => `<li>• ${item}</li>`).join('');
+        mealListEl.innerHTML = samples.map(item => `<li>• ${item}</li>`).join('');
         samples.forEach((item, idx) => {
             setTimeout(() => dropFood(item), idx * 500);
         });
@@ -396,11 +381,14 @@
         document.getElementById('target-text').value = '';
     };
 
-    // 초기 실행
     loadNeisMeal();
 
     Runner.run(Runner.create(), engine);
-    window.onresize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+    window.onresize = () => { 
+        canvas.width = window.innerWidth; 
+        canvas.height = window.innerHeight; 
+        boundarySize = { width: canvas.width * 0.95, height: canvas.height * 0.9 };
+    };
 </script>
 </body>
 </html>
