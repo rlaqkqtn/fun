@@ -7,7 +7,6 @@
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000205; color: white; font-family: 'Pretendard', sans-serif; }
         canvas { display: block; }
 
-        /* UI 슬림화: 오른쪽 상단 급식표 */
         #meal-board {
             position: absolute; top: 15px; right: 15px;
             background: rgba(0, 0, 0, 0.75); padding: 10px 12px; border-radius: 12px;
@@ -18,14 +17,12 @@
         #meal-list { list-style: none; padding: 0; margin: 0; max-height: 180px; overflow-y: auto; }
         #meal-list li { padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.05); color: #ddd; font-size: 11px; }
 
-        /* UI 슬림화: 좌측 상단 리더보드 */
         #leaderboard { 
             position: absolute; top: 15px; left: 15px; 
             background: rgba(0,0,0,0.7); padding: 10px 12px; border-radius: 12px; 
             border: 1px solid rgba(255,255,255,0.08); width: 160px; z-index: 5; pointer-events: none; 
         }
 
-        /* UI 슬림화: 하단 투하 UI */
         #ui { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10; width: 100%; max-width: 360px; }
         #input-box { display: flex; gap: 8px; background: rgba(255,255,255,0.03); padding: 8px 10px; border-radius: 15px; backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
         input { flex: 1; background: transparent; border: none; color: white; outline: none; font-size: 13px; padding-left: 6px; }
@@ -326,19 +323,28 @@
     })();
 
     // ==========================================
-    // 나이스(NEIS) 급식 API 연동 파트
+    // 나이스(NEIS) 급식 API 연동 (CORS 우회 적용)
     // ==========================================
     const API_KEY = "7fa09fa2743e4c78844dfc42faef8a41";
     const OFFICE_CODE = "B10";   
-    const SCHOOL_CODE = "7010117"; // 입력하신 새로운 학교 코드로 적용 완료!
+    const SCHOOL_CODE = "7010117"; 
 
     async function loadNeisMeal() {
-        const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-        const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?Type=json&KEY=${API_KEY}&ATPT_OFCDC_SC_CODE=${OFFICE_CODE}&SD_SCHUL_CODE=${SCHOOL_CODE}&MLSV_YMD=${today}`;
+        // YYYYMMDD 날짜 구하기
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const today = `${year}${month}${day}`;
+
+        const neisTargetUrl = `https://open.neis.go.kr/hub/mealServiceDietInfo?Type=json&KEY=${API_KEY}&ATPT_OFCDC_SC_CODE=${OFFICE_CODE}&SD_SCHUL_CODE=${SCHOOL_CODE}&MLSV_YMD=${today}`;
+        
+        // CORS 우회 프록시 URL 감싸기
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(neisTargetUrl)}`;
         const mealListEl = document.getElementById('meal-list');
 
         try {
-            const response = await fetch(url);
+            const response = await fetch(proxyUrl);
             const data = await response.json();
 
             if (data.mealServiceDietInfo) {
@@ -360,6 +366,7 @@
                 throw new Error("No data");
             }
         } catch (e) {
+            console.error(e);
             dropSampleMeal();
         }
     }
