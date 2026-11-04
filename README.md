@@ -6,30 +6,28 @@
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000205; color: white; font-family: 'Pretendard', sans-serif; }
         canvas { display: block; }
-        
-        const HARDCODED_API_KEY = "7fa09fa2743e4c78844dfc42faef8a41";
-        #api-panel {
-            position: absolute; top: 15px; right: 20px; z-index: 10;
-            background: rgba(0, 0, 0, 0.75); padding: 12px 16px; border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);
-            display: flex; flex-direction: column; gap: 8px; font-size: 13px; width: 280px;
-        }
-        #api-panel input {
-            background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15);
-            color: white; border-radius: 6px; padding: 6px 10px; font-size: 12px; outline: none;
-        }
-        .btn-group { display: flex; gap: 6px; }
-        .btn-group button { flex: 1; padding: 8px; font-size: 12px; }
 
-        /* 하단 단어 투하 UI */
+        /* [수정 3] 오른쪽 상단 급식표 UI */
+        #meal-board {
+            position: absolute; top: 20px; right: 20px;
+            background: rgba(0, 0, 0, 0.75); padding: 15px; border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+            width: 220px; z-index: 10; font-size: 13px;
+        }
+        #meal-board h3 { margin: 0 0 10px 0; font-size: 14px; color: #00f2fe; text-align: center; }
+        #meal-list { list-style: none; padding: 0; margin: 0; max-height: 250px; overflow-y: auto; }
+        #meal-list li { padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); color: #ddd; font-size: 12px; }
+
+        /* 좌측 상단 리더보드 (기존 유지) */
+        #leaderboard { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.7); padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.08); width: 220px; z-index: 5; pointer-events: none; }
+
+        /* 하단 투하 UI (기존 유지) */
         #ui { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 10; width: 100%; max-width: 450px; }
-        #input-box { display: flex; gap: 10px; background: rgba(255, 255, 255, 0.03); padding: 12px; border-radius: 20px; backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        input[type="text"] { flex: 1; background: transparent; border: none; color: white; outline: none; font-size: 16px; padding-left: 10px; }
+        #input-box { display: flex; gap: 10px; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 20px; backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        input { flex: 1; background: transparent; border: none; color: white; outline: none; font-size: 16px; padding-left: 10px; }
         input::placeholder { color: rgba(255,255,255,0.3); }
         button { background: linear-gradient(45deg, #00f2fe, #4facfe); border: none; padding: 10px 20px; border-radius: 12px; font-weight: bold; color: white; cursor: pointer; transition: 0.2s; white-space: nowrap; }
-        button:hover { transform: scale(1.03); box-shadow: 0 0 15px rgba(0,242,254,0.6); }
-        
-        #leaderboard { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.7); padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.08); width: 220px; z-index: 5; pointer-events: none; }
+        button:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(0,242,254,0.6); }
     </style>
 </head>
 <body>
@@ -39,26 +37,20 @@
     <div id="list"></div>
 </div>
 
-<!-- NEIS API 제어 패널 -->
-<div id="api-panel">
-    <div style="font-weight: bold; color: #00f2fe; margin-bottom: 2px;">🍱 나이스 급식 API 연동</div>
-    <input type="text" id="api-key" placeholder="API KEY" value="">
-    <div style="display: flex; gap: 5px;">
-        <input type="text" id="office-code" placeholder="시도교육청코드(예: B10)" value="B10" style="width: 50%;">
-        <input type="text" id="school-code" placeholder="학교코드(7자리)" value="7010537" style="width: 50%;">
-    </div>
-    <input type="date" id="meal-date">
-    <div class="btn-group">
-        <button id="fetch-meal-btn">급식 불러오기</button>
-        <button id="sample-meal-btn" style="background: linear-gradient(45deg, #ff0844, #ffb199);">샘플 투하</button>
-    </div>
+<!-- 오른쪽 상단 급식표 -->
+<div id="meal-board">
+    <h3>🍱오늘의 급식표</h3>
+    <ul id="meal-list">
+        <li style="color:#888; text-align:center;">급식 불러오는 중...</li>
+    </ul>
+    <button id="retry-btn" style="width:100%; margin-top:10px; font-size:11px; padding:6px;">급식 다시 투하</button>
 </div>
 
 <div id="ui">
     <form id="spawn-form">
         <div id="input-box">
-            <input type="text" id="target-text" placeholder="물고기 이름 입력..." required maxlength="15" autocomplete="off">
-            <button type="submit">물고기 생성</button>
+            <input type="text" id="target-text" placeholder="단어를 입력해 생명체 투하..." required maxlength="15" autocomplete="off">
+            <button type="submit">투하</button>
         </div>
     </form>
 </div>
@@ -67,39 +59,33 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
 <script>
-    // 오늘 날짜 기본 세팅
-    document.getElementById('meal-date').valueAsDate = new Date();
-
     const { Engine, Runner, Bodies, Composite, Events, Body, Vector } = Matter;
     const engine = Engine.create({ enableSleeping: false });
     
-    // 밥이 아래로 떨어지도록 중력 설정
-    engine.world.gravity.y = 0.3;
+    // 급식 밥이천천히 떨어지도록 중력 적용
+    engine.world.gravity.y = 0.2;
 
     const canvas = document.getElementById('world');
     const ctx = canvas.getContext('2d');
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const boundarySize = { width: canvas.width * 0.95, height: canvas.height * 0.95 }; 
-    const autoWords = ["고래상어", "대왕오징어", "청새치", "가오리", "피라쿠루", "참치", "방어", "메기"]; 
+    const boundarySize = { width: 800, height: 700 }; 
+    const autoWords = ["새우", "치어", "플랑크톤", "조개", "해파리", "멸치", "해조류", "송사리", "구피","상어","오징어"]; 
 
-    // ==========================================
-    // [1] 물고기 생성
-    // ==========================================
+    // 물고기 스폰 (기존 크기보다 확대 요청 반영)
     const spawn = (text, x, y, sizeOverride = null) => {
         let isJackpot = sizeOverride ? false : Math.random() < 0.05;
-        let baseSize = sizeOverride || (35 + (text.length * 6)); 
-        if (isJackpot) baseSize *= 2.5;
+        let baseSize = sizeOverride || (30 + (text.length * 6)); 
+        if (isJackpot) baseSize *= 3;
 
-        const spawnX = x || (canvas.width / 2 + (Math.random() - 0.5) * (boundarySize.width * 0.7));
-        const spawnY = y || (canvas.height / 2 + (Math.random() - 0.5) * (boundarySize.height * 0.7));
+        const spawnX = x || (canvas.width / 2 + (Math.random() - 0.5) * (boundarySize.width * 0.8));
+        const spawnY = y || (canvas.height / 2 + (Math.random() - 0.5) * (boundarySize.height * 0.8));
 
         const fish = Bodies.circle(spawnX, spawnY, baseSize, {
-            frictionAir: 0.08,
+            frictionAir: 0.1,
             isSensor: true,
-            label: 'fish',
-            gravityScale: 0
+            label: 'fish'
         });
 
         fish.word = text;
@@ -107,56 +93,52 @@
         fish.isJackpot = isJackpot;
         
         const hue = isJackpot ? 300 : Math.random() * 360; 
-        fish.color = `hsl(${hue}, 100%, 65%)`;
+        fish.color = `hsl(${hue}, 100%, 65%)`; 
         fish.currentAngle = Math.random() * Math.PI * 2;
         fish.tailAngle = 0;
         fish.eatEffect = 0;
 
-        Body.setVelocity(fish, { x: (Math.random()-0.5)*4, y: (Math.random()-0.5)*4 });
+        Body.setVelocity(fish, { x: (Math.random()-0.5)*3, y: (Math.random()-0.5)*3 });
         Composite.add(engine.world, fish);
         return fish;
     };
 
-    // ==========================================
-    // [2] 급식 밥 (Food) 투하
-    // ==========================================
+    // [수정 2] 급식 밥 투하 (글씨 적힌 동그라미 밥 형태)
     const dropFood = (menuText) => {
-        const foodWidth = Math.min(Math.max(menuText.length * 14 + 20, 45), 140);
-        const foodHeight = 26;
+        // 글씨 길이에 비례해 동그라미 반지름(radius) 결정 (물고기보다 작게)
+        const radius = Math.min(Math.max(menuText.length * 5 + 12, 18), 45);
+        const spawnX = Math.random() * (canvas.width - 300) + 150;
 
-        const spawnX = Math.random() * (canvas.width - 200) + 100;
-        const food = Bodies.rectangle(spawnX, -30, foodWidth, foodHeight, {
+        const food = Bodies.circle(spawnX, -30, radius, {
             frictionAir: 0.05,
-            restitution: 0.3,
+            restitution: 0.4,
             label: 'food'
         });
 
-        food.menuText = menuText;
-        food.width = foodWidth;
-        food.height = foodHeight;
-        food.color = '#fffb00';
+        food.word = menuText;
+        food.size = radius;
+        food.color = '#fffb00'; // 급식 밥 네온 노란색
 
         Composite.add(engine.world, food);
     };
 
+    // [수정 1] 물고기 생성 속도 낮춤 (기존 1500ms -> 5000ms 로 변경)
     const checkPopulation = () => {
         const bodies = Composite.allBodies(engine.world).filter(b => b.label === 'fish');
-        if (bodies.length < 8) {
+        if (bodies.length < 7) {
             const randomWord = autoWords[Math.floor(Math.random() * autoWords.length)];
             spawn(randomWord);
         }
     };
-    setInterval(checkPopulation, 1500); 
+    setInterval(checkPopulation, 5000); 
 
-    // ==========================================
-    // [3] 물리 및 섭취 로직 업데이트
-    // ==========================================
     Events.on(engine, 'afterUpdate', () => {
-        const allBodies = Composite.allBodies(engine.world);
-        const fishes = allBodies.filter(b => b.label === 'fish');
-        const foods = allBodies.filter(b => b.label === 'food');
-        const center = { x: canvas.width / 2, y: canvas.height / 2 }; 
+        const bodies = Composite.allBodies(engine.world);
+        const fishes = bodies.filter(b => b.label === 'fish');
+        const foods = bodies.filter(b => b.label === 'food');
+        const center = { x: canvas.width / 2, y: canvas.height / 2 };
 
+        // 바닥 나간 밥 제거
         foods.forEach(food => {
             if (food.position.y > canvas.height + 50) {
                 Composite.remove(engine.world, food);
@@ -164,11 +146,12 @@
         });
 
         fishes.forEach(me => {
+            // 물고기는 중력에 영향받지 않도록 보정
             Body.setVelocity(me, { x: me.velocity.x, y: me.velocity.y - engine.world.gravity.y * 0.9 });
 
-            if (me.size > 450) {
+            if (me.size > 350) {
                 for (let i = 0; i < 3; i++) {
-                    spawn(me.word, me.position.x, me.position.y, 40);
+                    spawn(me.word, me.position.x, me.position.y, 30);
                 }
                 Composite.remove(engine.world, me);
                 return;
@@ -178,36 +161,38 @@
             const dy = me.position.y - center.y;
             if (Math.abs(dx) > boundarySize.width / 2 || Math.abs(dy) > boundarySize.height / 2) {
                 const toCenter = Vector.normalise(Vector.sub(center, me.position));
-                Body.applyForce(me, me.position, Vector.mult(toCenter, 0.008 * me.size));
+                Body.applyForce(me, me.position, Vector.mult(toCenter, 0.007 * me.size));
             }
 
-            let targetFood = null;
+            // 1. 급식 밥 동그라미를 우선 탐색 및 추적
+            let nearestFood = null;
             let minFoodDist = Infinity;
             foods.forEach(food => {
                 const dist = Vector.magnitude(Vector.sub(me.position, food.position));
-                if (dist < 500 && dist < minFoodDist) {
+                if (dist < 400 && dist < minFoodDist) {
                     minFoodDist = dist;
-                    targetFood = food;
+                    nearestFood = food;
                 }
             });
 
-            if (targetFood) {
-                const diff = Vector.sub(targetFood.position, me.position);
+            if (nearestFood) {
+                const diff = Vector.sub(nearestFood.position, me.position);
                 const norm = Vector.normalise(diff);
-                Body.applyForce(me, me.position, Vector.mult(norm, 0.0008 * me.size));
+                Body.applyForce(me, me.position, Vector.mult(norm, 0.0007 * me.size));
 
-                if (minFoodDist < me.size + 15) {
+                // 밥 섭취
+                if (minFoodDist < me.size + nearestFood.size) {
                     const oldSize = me.size;
-                    me.size += Math.max(targetFood.menuText.length * 1.5, 5);
+                    me.size += nearestFood.size * 0.4;
                     Body.scale(me, me.size / oldSize, me.size / oldSize);
                     me.eatEffect = 20;
-
-                    Composite.remove(engine.world, targetFood);
+                    Composite.remove(engine.world, nearestFood);
                 }
             } else {
+                // 2. 밥이 없으면 다른 물고기 유영
                 let nearest = null;
                 let minDist = Infinity;
-                const visionRange = me.size * 8; 
+                const visionRange = me.size * 12; 
 
                 fishes.forEach(other => {
                     if (me === other) return;
@@ -221,35 +206,34 @@
                 if (nearest) {
                     const diff = Vector.sub(nearest.position, me.position);
                     const norm = Vector.normalise(diff);
-                    const forceMag = me.size > nearest.size ? 0.0005 : -0.0003;
+                    const forceMag = me.size > nearest.size ? 0.0006 : -0.0004;
                     Body.applyForce(me, me.position, Vector.mult(norm, forceMag * me.size));
                 }
             }
 
+            // 3. 기존 물고기 상호 포식 유지
             fishes.forEach(other => {
                 if (me === other || other.removed) return;
                 const dist = Vector.magnitude(Vector.sub(me.position, other.position));
-                if (dist < me.size * 0.8 && me.size > other.size * 1.15) {
+                if (dist < me.size * 0.9 && me.size > other.size * 1.05) {
                     const oldSize = me.size;
-                    me.size += other.size * 0.2;
+                    me.size += other.size * 0.25;
                     Body.scale(me, me.size / oldSize, me.size / oldSize);
-                    me.eatEffect = 25;
+                    me.eatEffect = 20;
                     other.removed = true;
                     Composite.remove(engine.world, other);
                 }
             });
 
             const speed = Vector.magnitude(me.velocity);
-            const limit = me.size > 200 ? 2.5 : 4.0; 
+            const limit = me.size > 150 ? 2.0 : 3.5; 
             if (speed > limit) {
                 Body.setVelocity(me, Vector.mult(Vector.normalise(me.velocity), limit));
             }
         });
     });
 
-    // ==========================================
-    // [4] 렌더링
-    // ==========================================
+    // 물고기 그리기 (기존 코드 100% 동일)
     function drawFish(ctx, f) {
         const { x, y } = f.position;
         const speed = Vector.magnitude(f.velocity);
@@ -269,17 +253,17 @@
         ctx.rotate(f.currentAngle);
 
         if (f.isJackpot || f.eatEffect > 0) {
-            ctx.shadowBlur = (f.isJackpot ? 60 : 35);
+            ctx.shadowBlur = (f.isJackpot ? 60 : 30);
             ctx.shadowColor = f.color;
         }
 
-        ctx.fillStyle = f.color.replace('hsl', 'hsla').replace(')', `, ${f.eatEffect > 0 ? 0.8 : 0.25})`); 
+        ctx.fillStyle = f.color.replace('hsl', 'hsla').replace(')', `, ${f.eatEffect > 0 ? 0.8 : 0.2})`); 
         ctx.beginPath();
         ctx.ellipse(0, 0, f.size, f.size/2.2, 0, 0, Math.PI * 2);
         ctx.fill();
         
         ctx.strokeStyle = f.color;
-        ctx.lineWidth = f.isJackpot ? 3 : 2;
+        ctx.lineWidth = f.isJackpot ? 3 : 1.5;
         ctx.stroke();
 
         ctx.fillStyle = f.color;
@@ -293,37 +277,37 @@
 
         ctx.shadowBlur = 0; 
         ctx.fillStyle = "white";
-        ctx.font = `bold ${Math.max(f.size * 0.35, 12)}px Arial`;
+        ctx.font = `bold ${f.size * 0.4}px Arial`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(f.word, 0, 0);
         ctx.restore();
     }
 
+    // 동그라미 밥 그리기
     function drawFood(ctx, food) {
         const { x, y } = food.position;
         ctx.save();
         ctx.translate(x, y);
-        ctx.rotate(food.angle);
 
         ctx.shadowBlur = 15;
         ctx.shadowColor = food.color;
 
-        ctx.fillStyle = "rgba(255, 251, 0, 0.2)";
+        ctx.fillStyle = "rgba(255, 251, 0, 0.25)";
         ctx.strokeStyle = food.color;
         ctx.lineWidth = 1.5;
 
         ctx.beginPath();
-        ctx.roundRect(-food.width/2, -food.height/2, food.width, food.height, 8);
+        ctx.arc(0, 0, food.size, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
 
         ctx.shadowBlur = 0;
-        ctx.fillStyle = "#ffffff";
-        ctx.font = `bold 12px Arial`;
+        ctx.fillStyle = "white";
+        ctx.font = `bold ${Math.max(food.size * 0.45, 10)}px Arial`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(food.menuText, 0, 0);
+        ctx.fillText(food.word, 0, 0);
 
         ctx.restore();
     }
@@ -352,32 +336,16 @@
     })();
 
     // ==========================================
-    // [5] 나이스(NEIS) 급식 API 호출 파트
+    // 나이스(NEIS) 급식 API 연동
     // ==========================================
+    const API_KEY = "7fa09fa2743e4c78844dfc42faef8a41";
+    const OFFICE_CODE = "B10";   // 서울특별시교육청 (필요시 변경)
+    const SCHOOL_CODE = "7010537"; // 강동고등학교 예시 (필요시 변경)
 
-    // 🔑 제공해주신 API 키 자동 적용 완료
-    const HARDCODED_API_KEY = "7fa09fa2743e4c78844dfc42faef8a41"; 
-
-    if (HARDCODED_API_KEY) {
-        document.getElementById('api-key').value = HARDCODED_API_KEY;
-    }
-
-    async function fetchNeisMeal() {
-        const apiKey = document.getElementById('api-key').value.trim() || HARDCODED_API_KEY;
-        const officeCode = document.getElementById('office-code').value.trim();
-        const schoolCode = document.getElementById('school-code').value.trim();
-        const dateInput = document.getElementById('meal-date').value.replace(/-/g, '');
-
-        if (!officeCode || !schoolCode || !dateInput) {
-            alert('교육청코드, 학교코드, 날짜를 정확히 입력해주세요!');
-            return;
-        }
-
-        let url = `https://open.neis.go.kr/hub/mealServiceDietInfo?Type=json&ATPT_OFCDC_SC_CODE=${officeCode}&SD_SCHUL_CODE=${schoolCode}&MLSV_YMD=${dateInput}`;
-        
-        if (apiKey) {
-            url += `&KEY=${apiKey}`;
-        }
+    async function loadNeisMeal() {
+        const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+        const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?Type=json&KEY=${API_KEY}&ATPT_OFCDC_SC_CODE=${OFFICE_CODE}&SD_SCHUL_CODE=${SCHOOL_CODE}&MLSV_YMD=${today}`;
+        const mealListEl = document.getElementById('meal-list');
 
         try {
             const response = await fetch(url);
@@ -385,7 +353,6 @@
 
             if (data.mealServiceDietInfo) {
                 const rawDDISH = data.mealServiceDietInfo[1].row[0].DDISH_NM;
-                
                 const cleanMenu = rawDDISH
                     .replace(/<br\/>/g, '\n')
                     .replace(/\([0-9.]+\)/g, '')
@@ -394,38 +361,43 @@
 
                 const menuItems = cleanMenu.split('\n').filter(item => item.trim() !== '');
 
-                menuItems.forEach((item, index) => {
-                    setTimeout(() => {
-                        dropFood(item.trim());
-                    }, index * 600);
+                // 오른쪽 급식표 UI 업데이트
+                mealListEl.innerHTML = menuItems.map(item => `<li>• ${item}</li>`).join('');
+
+                // 밥 투하 (0.5초 간격)
+                menuItems.forEach((item, idx) => {
+                    setTimeout(() => dropFood(item.trim()), idx * 500);
                 });
             } else {
-                alert('해당 날짜의 급식 정보가 없거나 코드가 올바르지 않습니다. (주말/방학 여부 확인)');
+                // 주말/방학 등 급식 없을 때 샘플 급식으로 자동 전환
+                mealListEl.innerHTML = `<li style="color:#ffb199;">(오늘 급식 없음 - 샘플)</li>`;
+                dropSampleMeal();
             }
-        } catch (error) {
-            console.error('API Fetch Error:', error);
-            alert('급식 데이터를 불러오는데 실패했습니다. CORS 문제 또는 네트워크 상태를 확인해주세요.');
+        } catch (e) {
+            mealListEl.innerHTML = `<li style="color:#ffb199;">(샘플 급식 투하 중)</li>`;
+            dropSampleMeal();
         }
     }
 
     function dropSampleMeal() {
-        const samples = ["제육볶음", "돈까스", "배추김치", "잔치국수", "초코케이크", "바나나우유", "해물파전", "된장찌개"];
-        samples.forEach((item, index) => {
-            setTimeout(() => {
-                dropFood(item);
-            }, index * 400);
+        const samples = [ " 예시 "];
+        const mealListEl = document.getElementById('meal-list');
+        mealListEl.innerHTML += samples.map(item => `<li>• ${item}</li>`).join('');
+        samples.forEach((item, idx) => {
+            setTimeout(() => dropFood(item), idx * 500);
         });
     }
 
-    document.getElementById('fetch-meal-btn').onclick = fetchNeisMeal;
-    document.getElementById('sample-meal-btn').onclick = dropSampleMeal;
+    document.getElementById('retry-btn').onclick = loadNeisMeal;
 
     document.getElementById('spawn-form').onsubmit = (e) => {
         e.preventDefault();
-        const input = document.getElementById('target-text');
-        spawn(input.value);
-        input.value = '';
+        spawn(document.getElementById('target-text').value);
+        document.getElementById('target-text').value = '';
     };
+
+    // 초기 실행
+    loadNeisMeal();
 
     Runner.run(Runner.create(), engine);
     window.onresize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
